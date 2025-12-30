@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Intent Layer — Choose a Platform</title>
+  <style>
+   /* =========================================================
+   EDITORIAL / KNOWLEDGE PRODUCT THEME
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: #fafafa;
+  font-family: "Inter", system-ui, -apple-system, Segoe UI, sans-serif;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== MAIN CONTAINER ===== */
+
+.container {
+  background: #ffffff;
+  max-width: 640px;
+  width: 92%;
+  padding: 52px;
+  border-radius: 14px;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 10px 30px rgba(0,0,0,0.06);
+}
+
+/* ===== HEADING ===== */
+
+h1 {
+  font-size: 2.6rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin: 0 0 14px;
+  text-align: center;
+}
+
+h1 + p {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin: 0 auto 44px;
+  max-width: 520px;
+  text-align: center;
+}
+
+/* ===== PLATFORM SECTION ===== */
+
+.platform-options {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+/* ===== PLATFORM CARDS ===== */
+
+.platform-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 28px;
+  width: 220px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.platform-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 8px 20px rgba(0,0,0,0.08);
+}
+
+/* Platform icon */
+.icon {
+  font-size: 52px;
+  margin-bottom: 16px;
+}
+
+/* Platform name */
+.platform-card h2 {
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Platform description */
+.platform-card p {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #6b7280;
+}
+
+/* ===== INFO BOX ===== */
+
+.container > div:last-child {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+.container > div:last-child h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.container > div:last-child ul {
+  padding-left: 18px;
+  margin: 14px 0 0;
+}
+
+.container > div:last-child li {
+  margin-bottom: 10px;
+  color: #4b5563;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 640px) {
+  .container {
+    padding: 36px 28px;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+  }
+
+  .platform-card {
+    width: 100%;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧠 Intent Layer</h1>
+    <p>
+      Most apps force you to guess the right keywords.  
+      This shows what happens when software understands <strong>what you actually mean</strong>.
+    </p>
+    
+    <div class="platform-options">
+      <div class="platform-card youtube" onclick="navigateTo('youtube')">
+        <div class="icon">▶️</div>
+        <h2>YouTube</h2>
+        <p>
+          Compare keyword search vs intent-aware discovery  
+          (shorts + long-form, re-ranked)
+        </p>
+      </div>
+      
+      <div class="platform-card reddit" onclick="navigateTo('reddit')">
+        <div class="icon">👥</div>
+        <h2>Reddit</h2>
+        <p>
+          Find real discussions without knowing  
+          the right subreddit or phrasing
+        </p>
+      </div>
+    </div>
+    
+    <div>
+      <h3>What this demonstrates</h3>
+      <ul>
+        <li>You describe a situation, not a keyword</li>
+        <li>An AI model extracts structured intent</li>
+        <li>The same intent reshapes different platforms</li>
+        <li>Results change meaningfully — not cosmetically</li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function navigateTo(platform) {
+      if (platform === 'youtube') {
+        window.location.href = 'youtube.html';
+      } else if (platform === 'reddit') {
+        window.location.href = 'reddit.html';
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'y' || e.key === 'Y') {
+        navigateTo('youtube');
+      } else if (e.key === 'r' || e.key === 'R') {
+        navigateTo('reddit');
+      }
+    });
+  </script>
+</body>
+</html>

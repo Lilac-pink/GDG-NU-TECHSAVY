@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Intent as an API</title>
+
+  <style>
+    /* =========================================================
+       GLOBAL THEME (MATCHES HOME)
+    ========================================================= */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: #fafafa;
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: #111827;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 92%;
+      padding: 48px 0;
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 36px;
+      max-width: 600px;
+    }
+
+    /* =========================================================
+       INPUT CARD
+    ========================================================= */
+
+    .card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 32px;
+      border: 1px solid #e5e7eb;
+      box-shadow:
+        0 1px 2px rgba(0,0,0,0.04),
+        0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      padding: 14px 16px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-family: inherit;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+    }
+
+    button {
+      margin-top: 18px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 500;
+      background: #2563eb;
+      color: #ffffff;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #1e40af;
+    }
+
+    /* =========================================================
+       SECTION HEADERS
+    ========================================================= */
+
+    .section {
+      margin-top: 40px;
+    }
+
+    .section h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    /* =========================================================
+       CODE / JSON BLOCKS
+    ========================================================= */
+
+    pre {
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 20px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      border: 1px solid #020617;
+    }
+
+    /* =========================================================
+       VIDEO LISTS
+    ========================================================= */
+
+    .video {
+      display: flex;
+      gap: 16px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      margin-bottom: 14px;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .video:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .video img {
+      width: 160px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .video p {
+      margin: 0 0 6px;
+      font-weight: 500;
+    }
+
+    .video a {
+      font-size: 0.9rem;
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .video a:hover {
+      text-decoration: underline;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 640px) {
+      .video {
+        flex-direction: column;
+      }
+
+      .video img {
+        width: 100%;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h2>Intent → Structured Meaning</h2>
+    <p class="subtitle">
+      This demo shows how raw human language is converted into structured intent
+      that downstream apps can consume.
+    </p>
+
+    <div class="card">
+      <textarea id="input" placeholder="Describe what you want in natural language…"></textarea>
+      <button onclick="extractIntent()">Extract Intent</button>
+    </div>
+
+    <div class="section">
+      <h3>Intent JSON</h3>
+      <pre id="output">{}</pre>
+    </div>
+
+    <div class="section">
+      <h3>YouTube Query Generated</h3>
+      <pre id="query"></pre>
+    </div>
+
+    <div class="section">
+      <h3>🎯 Shorts</h3>
+      <div id="shorts"></div>
+    </div>
+
+    <div class="section">
+      <h3>📺 Long-form Videos</h3>
+      <div id="long"></div>
+    </div>
+  </div>
+
+<script>
+async function extractIntent() {
+  const text = document.getElementById("input").value;
+
+  const res = await fetch("http://localhost:3000/extract-intent", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text })
+  });
+
+  const data = await res.json();
+
+  document.getElementById("output").textContent =
+    JSON.stringify(data.intent, null, 2);
+
+  document.getElementById("query").textContent =
+    data.youtubeQuery || "";
+
+  const shortsDiv = document.getElementById("shorts");
+  shortsDiv.innerHTML = "";
+  (data.shorts || []).forEach(v => {
+    shortsDiv.innerHTML += `
+      <div class="video">
+        <img src="${v.thumbnail}" />
+        <div>
+          <p>${v.title}</p>
+          <a href="https://www.youtube.com/watch?v=${v.videoId}" target="_blank">
+            Watch →
+          </a>
+        </div>
+      </div>
+    `;
+  });
+
+  const longDiv = document.getElementById("long");
+  longDiv.innerHTML = "";
+  (data.long || []).forEach(v => {
+    longDiv.innerHTML += `
+      <div class="video">
+        <img src="${v.thumbnail}" />
+        <div>
+          <p>${v.title}</p>
+          <a href="https://www.youtube.com/watch?v=${v.videoId}" target="_blank">
+            Watch →
+          </a>
+        </div>
+      </div>
+    `;
+  });
+}
+</script>
+
+</body>
+</html>

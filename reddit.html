@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Intent Search - Reddit</title>
+  <style>
+    /* =========================================================
+       GLOBAL THEME (MATCHES HOME)
+    ========================================================= */
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: #fafafa;
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, sans-serif;
+      color: #111827;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 92%;
+      padding: 48px 0;
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #6b7280;
+      margin-bottom: 36px;
+      max-width: 600px;
+    }
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+
+    .header {
+      background: #ffffff;
+      padding: 20px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #e5e7eb;
+      margin-bottom: 32px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.5em;
+      font-weight: 700;
+    }
+
+    .back-button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: background-color 0.2s ease;
+    }
+
+    .back-button:hover {
+      background: #1e40af;
+      transform: none;
+    }
+
+    /* =========================================================
+       INPUT CARD
+    ========================================================= */
+
+    .card {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 32px;
+      border: 1px solid #e5e7eb;
+      box-shadow:
+        0 1px 2px rgba(0,0,0,0.04),
+        0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      resize: vertical;
+      padding: 14px 16px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      font-family: inherit;
+      color: #111827;
+      transition: border-color 0.3s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    textarea::placeholder {
+      color: #9ca3af;
+    }
+
+    /* =========================================================
+       SEARCH BUTTON
+    ========================================================= */
+
+    .search-button {
+      margin-top: 18px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 500;
+      background: #2563eb;
+      color: #ffffff;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .search-button:hover:not(:disabled) {
+      background: #1e40af;
+      transform: translateY(-2px);
+    }
+
+    .search-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* =========================================================
+       LOADING
+    ========================================================= */
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 30px;
+      color: #2563eb;
+      font-size: 1.1rem;
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      margin-top: 20px;
+    }
+
+    /* =========================================================
+       RESULTS SECTION
+    ========================================================= */
+
+    .results-section {
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 24px;
+      margin-top: 40px;
+    }
+
+    /* =========================================================
+       INTENT PANEL
+    ========================================================= */
+
+    .intent-panel {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 24px;
+      border: 1px solid #e5e7eb;
+      box-shadow:
+        0 1px 2px rgba(0,0,0,0.04),
+        0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .intent-panel h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      color: #111827;
+    }
+
+    /* =========================================================
+       CODE / JSON BLOCKS
+    ========================================================= */
+
+    .intent-display,
+    .query-display {
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 16px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      border: 1px solid #020617;
+      margin-bottom: 20px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .query-display {
+      background: #f8fafc;
+      color: #0f172a;
+      border: 1px solid #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* =========================================================
+       RESULTS PANEL
+    ========================================================= */
+
+    .results-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .result-category {
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 24px;
+      border: 1px solid #e5e7eb;
+      box-shadow:
+        0 1px 2px rgba(0,0,0,0.04),
+        0 10px 30px rgba(0,0,0,0.05);
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      color: #111827;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    /* =========================================================
+       REDDIT POSTS
+    ========================================================= */
+
+    .reddit-post {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      background: #ffffff;
+      margin-bottom: 14px;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .reddit-post:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    .post-score {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 50px;
+      color: #dc2626;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .post-content {
+      flex: 1;
+    }
+
+    .post-title {
+      margin: 0 0 10px 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+    }
+
+    .post-title a {
+      color: #111827;
+      text-decoration: none;
+    }
+
+    .post-title a:hover {
+      color: #2563eb;
+      text-decoration: underline;
+    }
+
+    .post-meta {
+      display: flex;
+      gap: 16px;
+      color: #6b7280;
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+    }
+
+    .subreddit {
+      color: #2563eb;
+      font-weight: 600;
+    }
+
+    .comments {
+      color: #059669;
+      font-weight: 600;
+    }
+
+    .post-thumbnail {
+      width: 100px;
+      height: 100px;
+      border-radius: 8px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .no-thumbnail {
+      width: 100px;
+      height: 100px;
+      background: #f0f0f0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================= */
+
+    @media (max-width: 768px) {
+      .results-section {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .reddit-post {
+        flex-direction: column;
+      }
+
+      .post-thumbnail,
+      .no-thumbnail {
+        width: 100%;
+        height: 200px;
+      }
+
+      .container {
+        width: 95%;
+        padding: 24px 0;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      h2 {
+        font-size: 1.8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+      }
+
+      .post-meta {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">
+        <span>👥</span>
+        <span>Reddit Intent Search</span>
+      </div>
+      <button class="back-button" onclick="window.location.href='index.html'">← Back to Platforms</button>
+    </header>
+
+    <main>
+      <section class="card">
+        <h2>Describe what you're looking for on Reddit</h2>
+        <p class="subtitle">The AI will analyze your intent and search Reddit for relevant posts across different categories.</p>
+        
+        <textarea id="input" placeholder="Example: I want to find posts about beginner programming projects that have lots of upvotes and comments..."></textarea>
+        
+        <button class="search-button" onclick="searchReddit()" id="searchBtn">Search Reddit</button>
+      </section>
+
+      <div id="loading" class="loading" aria-live="polite" aria-busy="true">
+        <div style="font-size: 2rem; margin-bottom: 8px;">⏳</div>
+        <p>Analyzing your intent and searching Reddit...</p>
+        <p>This may take a few moments.</p>
+      </div>
+
+      <section class="results-section" id="resultsSection" style="display: none;">
+        <aside class="intent-panel" aria-label="Extracted Intent and Query">
+          <h3>📋 Extracted Intent</h3>
+          <pre class="intent-display" id="intentDisplay">{}</pre>
+
+          <h3>🔍 Generated Search Query</h3>
+          <div class="query-display" id="queryDisplay"></div>
+
+          <h3>🎯 Search Breakdown</h3>
+          <pre class="intent-display" id="breakdownDisplay">{}</pre>
+        </aside>
+
+        <section class="results-panel" aria-label="Reddit Search Results">
+          <article class="result-category" aria-label="Hot Posts">
+            <div class="category-header">
+              <span style="color: #dc2626;">🔥</span>
+              <span>Hot Posts</span>
+            </div>
+            <div id="hotPosts"></div>
+          </article>
+
+          <article class="result-category" aria-label="New Posts">
+            <div class="category-header">
+              <span>🆕</span>
+              <span>New Posts</span>
+            </div>
+            <div id="newPosts"></div>
+          </article>
+
+          <article class="result-category" aria-label="Top Posts This Week">
+            <div class="category-header">
+              <span>⭐</span>
+              <span>Top Posts (This Week)</span>
+            </div>
+            <div id="topPosts"></div>
+          </article>
+        </section>
+      </section>
+    </main>
+  </div>
+
+<script>
+  async function searchReddit() {
+    const input = document.getElementById('input').value.trim();
+    if (!input) {
+      alert('Please describe what you want to search for.');
+      return;
+    }
+
+    // Show loading, hide results, disable button
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('resultsSection').style.display = 'none';
+    document.getElementById('searchBtn').disabled = true;
+
+    try {
+      const response = await fetch('http://localhost:3000/reddit-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: input })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Reddit data received:', data);
+
+      displayResults(data);
+
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error searching Reddit. Check console for details.');
+    } finally {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('resultsSection').style.display = 'grid';
+      document.getElementById('searchBtn').disabled = false;
+    }
+  }
+
+  function displayResults(data) {
+    document.getElementById('intentDisplay').textContent =
+      JSON.stringify(data.intent || {}, null, 2);
+
+    document.getElementById('queryDisplay').textContent =
+      data.query || 'No query generated';
+
+    document.getElementById('breakdownDisplay').textContent =
+      JSON.stringify(data.breakdown || {}, null, 2);
+
+    displayPosts('hot', data.hot || []);
+    displayPosts('new', data.new || []);
+    displayPosts('top', data.top || []);
+  }
+
+  function displayPosts(type, posts) {
+    const container = document.getElementById(type + 'Posts');
+    container.innerHTML = '';
+
+    if (posts.length === 0) {
+      container.innerHTML = '<p style="color: #6b7280; text-align: center; padding: 20px;">No posts found</p>';
+      return;
+    }
+
+    posts.forEach(post => {
+      const postElement = document.createElement('div');
+      postElement.className = 'reddit-post';
+
+      const scoreHtml = `
+        <div class="post-score">
+          <div>▲</div>
+          <div>${post.score || 0}</div>
+        </div>
+      `;
+
+      const thumbnail = post.thumbnail && !['self', 'default', 'nsfw'].includes(post.thumbnail)
+        ? `<img src="${post.thumbnail}" class="post-thumbnail" alt="Post thumbnail">`
+        : `<div class="no-thumbnail" aria-label="No thumbnail">📝</div>`;
+
+      const metaHtml = `
+        <div class="post-meta">
+          <span class="subreddit">r/${post.subreddit || 'unknown'}</span>
+          <span>by u/${post.author || 'unknown'}</span>
+          <span class="comments">💬 ${post.comments || 0} comments</span>
+        </div>
+      `;
+
+      postElement.innerHTML = `
+        ${scoreHtml}
+        ${thumbnail}
+        <div class="post-content">
+          <h3 class="post-title">
+            <a href="${post.url || '#'}" target="_blank" rel="noopener noreferrer">${post.title || 'No title'}</a>
+          </h3>
+          ${metaHtml}
+          ${post.selftext ? `<p style="margin-top: 10px; color: #4b5563;">${truncateText(post.selftext, 200)}</p>` : ''}
+        </div>
+      `;
+
+      container.appendChild(postElement);
+    });
+  }
+
+  function truncateText(text, maxLength) {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  }
+
+  // Ctrl+Enter or Shift+Enter triggers search
+  document.getElementById('input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.shiftKey)) {
+      e.preventDefault();
+      searchReddit();
+    }
+  });
+</script>
+
+</body>
+</html>
